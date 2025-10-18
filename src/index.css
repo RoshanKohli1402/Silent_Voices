@@ -8,48 +8,52 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 240 60% 6%;
-    --foreground: 200 100% 98%;
+    --background: 230 40% 8%;
+    --foreground: 0 0% 98%;
 
-    --card: 240 50% 10%;
-    --card-foreground: 200 100% 98%;
+    --card: 230 35% 12%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 240 50% 12%;
-    --popover-foreground: 200 100% 98%;
+    --popover: 230 35% 15%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 271 81% 56%;
-    --primary-foreground: 200 100% 98%;
+    --primary: 18 95% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 189 94% 43%;
-    --secondary-foreground: 240 60% 6%;
+    --secondary: 186 100% 50%;
+    --secondary-foreground: 230 40% 8%;
 
-    --muted: 240 40% 20%;
-    --muted-foreground: 200 20% 70%;
+    --muted: 230 30% 25%;
+    --muted-foreground: 0 0% 75%;
 
-    --accent: 189 94% 43%;
-    --accent-foreground: 240 60% 6%;
+    --accent: 45 100% 62%;
+    --accent-foreground: 230 40% 8%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 200 100% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 240 30% 20%;
-    --input: 240 30% 18%;
-    --ring: 271 81% 56%;
+    --border: 230 30% 20%;
+    --input: 230 30% 18%;
+    --ring: 18 95% 60%;
 
     --radius: 1rem;
 
-    /* Gradient stops */
-    --gradient-from: 240 67% 20%;
-    --gradient-via: 271 81% 56%;
-    --gradient-to: 189 94% 43%;
+    /* Gradient stops - Sunset motivational gradient */
+    --gradient-from: 230 45% 15%;
+    --gradient-via: 280 60% 35%;
+    --gradient-to: 18 95% 60%;
 
-    /* Glow colors */
-    --glow-primary: 271 81% 56%;
-    --glow-secondary: 189 94% 43%;
+    /* Glow colors - Warm and motivating */
+    --glow-primary: 18 95% 60%;
+    --glow-secondary: 186 100% 50%;
 
     /* Glass effect */
-    --glass-background: 240 50% 10%;
-    --glass-border: 200 100% 98%;
+    --glass-background: 230 35% 12%;
+    --glass-border: 0 0% 98%;
+
+    /* Success color */
+    --success: 158 64% 52%;
+    --success-foreground: 0 0% 100%;
   }
 }
 
@@ -81,15 +85,19 @@ All colors MUST be HSL.
 
   /* Neon glow effects */
   .glow-primary {
-    box-shadow: 0 0 20px hsl(var(--glow-primary) / 0.5), 0 0 40px hsl(var(--glow-primary) / 0.3);
+    box-shadow: 0 0 25px hsl(var(--glow-primary) / 0.6), 0 0 50px hsl(var(--glow-primary) / 0.4);
   }
 
   .glow-secondary {
-    box-shadow: 0 0 20px hsl(var(--glow-secondary) / 0.5), 0 0 40px hsl(var(--glow-secondary) / 0.3);
+    box-shadow: 0 0 25px hsl(var(--glow-secondary) / 0.6), 0 0 50px hsl(var(--glow-secondary) / 0.4);
   }
 
   .text-glow {
-    text-shadow: 0 0 20px hsl(var(--glow-secondary) / 0.8), 0 0 40px hsl(var(--glow-secondary) / 0.4);
+    text-shadow: 0 0 25px hsl(var(--glow-primary) / 0.9), 0 0 50px hsl(var(--glow-primary) / 0.5);
+  }
+
+  .glow-success {
+    box-shadow: 0 0 25px hsl(var(--success) / 0.6), 0 0 50px hsl(var(--success) / 0.4);
   }
 
   /* Animations */
