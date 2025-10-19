@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Video, Volume2, Languages, Activity, VideoOff, CheckCircle2, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
 
 const Interpreter = () => {
   const [isDetecting, setIsDetecting] = useState(false);
@@ -12,44 +13,112 @@ const Interpreter = () => {
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [cameraError, setCameraError] = useState("");
+  const [stream, setStream] = useState<MediaStream | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const gestureRecognizerRef = useRef<GestureRecognizer | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
   const { toast } = useToast();
 
-  // Cleanup camera stream on unmount
+  // 1. Initialize the Gesture Recognizer model
   useEffect(() => {
-    return () => {
-      stopCamera();
+    const createGestureRecognizer = async () => {
+      try {
+        const vision = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+        );
+        const recognizer = await GestureRecognizer.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
+            delegate: "GPU"
+          },
+          runningMode: "VIDEO",
+          numHands: 2
+        });
+        gestureRecognizerRef.current = recognizer;
+        toast({ title: "AI Model Loaded", description: "Ready to recognize signs." });
+      } catch (error) {
+        console.error("Error loading gesture recognizer model:", error);
+        setCameraError("Failed to load AI model. Please refresh the page.");
+      }
     };
-  }, []);
+    createGestureRecognizer();
+  }, [toast]);
+  
+  // 2. Main prediction loop
+  const predictWebcam = () => {
+    if (!isCameraActive || !videoRef.current || !gestureRecognizerRef.current) return;
+
+    const video = videoRef.current;
+    if (video.currentTime === (video as any).lastTime) {
+      animationFrameRef.current = requestAnimationFrame(predictWebcam);
+      return;
+    }
+    (video as any).lastTime = video.currentTime;
+
+    const results = gestureRecognizerRef.current.recognizeForVideo(video, Date.now());
+
+    if (results.gestures.length > 0) {
+      const categoryName = results.gestures[0][0].categoryName;
+      // Simple mapping for demonstration. You can expand this.
+      const signMapping: { [key: string]: string } = {
+        "Closed_Fist": "Stop",
+        "Open_Palm": "Hello",
+        "Thumb_Up": "Yes / Good",
+        "Thumb_Down": "No / Bad",
+        "Victory": "Peace / Two",
+        "ILoveYou": "I Love You"
+      };
+      
+      const interpretation = signMapping[categoryName] || "";
+      if (interpretation && interpretation !== detectedText) {
+        setDetectedText(interpretation);
+      }
+    }
+
+    animationFrameRef.current = requestAnimationFrame(predictWebcam);
+  };
+  
+  // 3. Effect to manage the video stream and prediction loop
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.addEventListener("loadeddata", () => {
+        // Start the prediction loop
+        animationFrameRef.current = requestAnimationFrame(predictWebcam);
+      });
+      videoRef.current.play().catch(err => {
+        console.error("Video play failed:", err);
+        setCameraError("Failed to play video. Please check browser permissions.");
+      });
+    }
+
+    return () => {
+      // Cleanup: stop prediction loop when stream changes
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [stream]);
 
   const startCamera = async () => {
+    if (!gestureRecognizerRef.current) {
+      toast({ title: "Model Loading", description: "Please wait for the AI model to load before starting the camera.", variant: "destructive" });
+      return;
+    }
     try {
       setCameraError("");
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user", width: 1280, height: 720 }
       });
+      setStream(mediaStream);
+      setIsCameraActive(true);
+      setIsDetecting(true);
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setIsCameraActive(true);
-        
-        toast({
-          title: "Camera Active!",
-          description: "Ready to detect your signs",
-        });
-
-        // Mock detection for now - will be replaced with real AI
-        setTimeout(() => {
-          setIsDetecting(true);
-          setTimeout(() => {
-            setDetectedText("Hello, how are you?");
-            setIsDetecting(false);
-          }, 2000);
-        }, 1000);
-      }
+      toast({
+        title: "Camera Active!",
+        description: "Ready to detect your signs",
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to access camera";
       setCameraError(errorMessage);
@@ -63,13 +132,13 @@ const Interpreter = () => {
   };
 
   const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
     }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
     }
+    setStream(null);
     setIsCameraActive(false);
     setIsDetecting(false);
   };
@@ -86,12 +155,9 @@ const Interpreter = () => {
       return;
     }
 
-    // Cancel any ongoing speech
     window.speechSynthesis.cancel();
-
     const utterance = new SpeechSynthesisUtterance(detectedText);
     
-    // Set language based on selection
     const languageMap: { [key: string]: string } = {
       en: 'en-US',
       es: 'es-ES',
@@ -147,9 +213,7 @@ const Interpreter = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main Content - Translation Panel & Camera */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Translation Panel - Primary Focus */}
             <Card className="glass-strong border-primary/20 p-6">
               <div className="flex items-center gap-3 mb-4">
                 <Languages className="w-6 h-6 text-primary" />
@@ -200,7 +264,6 @@ const Interpreter = () => {
               </div>
             </Card>
 
-            {/* Camera Section */}
             <Card className="glass-strong border-secondary/20 p-6">
               <div className="relative aspect-video bg-muted/20 rounded-xl overflow-hidden border-2 border-secondary/30">
                 {isCameraActive ? (
@@ -213,7 +276,6 @@ const Interpreter = () => {
                       className="w-full h-full object-cover"
                     />
                     
-                    {/* Status Indicator */}
                     {isDetecting && (
                       <div className="absolute top-4 left-4 glass px-4 py-2 rounded-full flex items-center gap-2 glow-success animate-fade-in">
                         <Activity className="w-4 h-4 text-success animate-pulse" />
@@ -221,13 +283,11 @@ const Interpreter = () => {
                       </div>
                     )}
                     
-                    {/* Active indicator */}
                     <div className="absolute top-4 right-4 glass px-4 py-2 rounded-full flex items-center gap-2">
                       <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
                       <span className="text-sm font-medium">Live</span>
                     </div>
 
-                    {/* Stop button */}
                     <div className="absolute bottom-4 left-4">
                       <Button onClick={stopCamera} variant="destructive" className="gap-2">
                         <VideoOff className="w-4 h-4" />
@@ -241,9 +301,9 @@ const Interpreter = () => {
                       {cameraError ? (
                         <>
                           <AlertCircle className="w-16 h-16 text-destructive mx-auto" />
-                          <p className="text-destructive font-medium">Camera Access Denied</p>
+                          <p className="text-destructive font-medium">{cameraError}</p>
                           <p className="text-sm text-muted-foreground max-w-xs">
-                            Please allow camera permissions in your browser settings
+                            Please allow camera permissions and ensure your device is connected.
                           </p>
                         </>
                       ) : (
@@ -263,7 +323,6 @@ const Interpreter = () => {
             </Card>
           </div>
 
-          {/* Settings Sidebar */}
           <div className="space-y-6">
             <Card className="glass-strong border-accent/20 p-6">
               <h3 className="text-xl font-bold mb-4">Settings</h3>
@@ -299,7 +358,9 @@ const Interpreter = () => {
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">AI Model</span>
-                      <span className="text-success font-medium">Ready</span>
+                      <span className={gestureRecognizerRef.current ? "text-success font-medium" : "text-muted-foreground"}>
+                        {gestureRecognizerRef.current ? "Ready" : "Loading..."}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Detection</span>

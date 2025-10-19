@@ -1,73 +1,43 @@
-# Welcome to your Lovable project
+# 🧏‍♀️ SignBridge – Accessible Sign Language Interpreter
 
-## Project info
+> **Every Sign Has a Voice.**  
+> A real-time AI-powered web app that interprets sign language into text and speech — breaking communication barriers and enabling true inclusivity.
 
-**URL**: https://lovable.dev/projects/65f3b91f-3873-4d5a-b079-f9fe5c331659
+---
 
-## How can I edit this code?
+## 🌍 Overview
+**SignBridge** is an open-source accessibility project that uses **AI + Computer Vision + NLP** to interpret **sign language gestures** captured via webcam and convert them into **text and speech** in multiple languages.  
+Built with an accessibility-first design philosophy, it aims to make **education, healthcare, and public communication** more inclusive for the hearing-impaired community.
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## ✨ Key Features
+- 🎥 **Real-Time Sign Detection:** Detects gestures via webcam using AI (TensorFlow.js / PyTorch).  
+- 🗣️ **Text + Speech Output:** Converts recognized signs into text and voice.  
+- 🌐 **Multilingual Translation:** Supports multiple languages through integrated translation APIs.  
+- 🧩 **Accessible UI:** Designed following **W3C/WCAG** accessibility standards.  
+- 🧠 **AI-Powered Learning:** Model improves with continuous user feedback.  
+- 🔌 **API Support:** Integrate sign recognition into other apps and services.  
+- 🪩 **Futuristic UI/UX:** Built with React + Tailwind + animations inspired by Apple Vision Pro.  
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/65f3b91f-3873-4d5a-b079-f9fe5c331659) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🏗️ Tech Stack
 
-**Use your preferred IDE**
+| Layer | Technologies Used |
+|-------|--------------------|
+| **Frontend** | React.js / Next.js, Tailwind CSS, WebRTC |
+| **Backend** | Node.js / Express / Python (FastAPI for ML inference) |
+| **AI / ML** | TensorFlow.js, PyTorch, OpenCV, NLP Translation APIs |
+| **Database** | PostgreSQL / MongoDB |
+| **AR (Stretch Goal)** | WebXR / Three.js |
+| **Design** | Lovable.ai (UI/UX), Figma |
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 Getting Started
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/65f3b91f-3873-4d5a-b079-f9fe5c331659) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/yourusername/signbridge.git
+cd signbridge
